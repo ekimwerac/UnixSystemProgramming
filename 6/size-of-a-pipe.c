@@ -20,14 +20,17 @@ int main()
 		exit(1);
 	}
 
-	signal(SIGALRM, alrm_action);
+	signal(SIGALRM, (__sighandler_t)alrm_action);
 
 	for (count=0;;){
-		/* set alarm */
+		/* set alarm: see man 2 alarm. alarm(20) sets a timer alarm, such that if the 
+		 * write call is blocked for more than 20 seconds the alarm goes off and the 
+		 * code exits */
 		alarm(20);
 		/* Write down the pipe */
 		write(p[1],&c,1);;
-		/* Reset alarm */
+		/* Reset alarm . Once the write has succeeded, then cancel the alarm */
+
 		alarm(0);
 
 		if((++count % 1024) == 0){
@@ -37,9 +40,9 @@ int main()
 }
 
 /* Called when SIGALARM received*/
-alrm_action(){
+int alrm_action(){
 	printf("write blocked after %d characters\n", count);
-	exit(0);
+	exit (0); 
 }
 
 
